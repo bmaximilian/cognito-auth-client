@@ -1,0 +1,67 @@
+name: Build and Pages Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.16.1
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.15.1
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+      - name: Install dependencies
+        run: yarn
+        env:
+          NODE_ENV: development
+      - name: Lint
+        run: yarn lint
+      - name: Test
+        run: yarn test
+      - name: Build
+        run: yarn build
+      - name: Zip
+        run: |
+          mkdir release-zip
+          tar -czvf ./release-zip/release.tar.gz ./build/*
+      - name: Upload
+        uses: actions/upload-artifact@master
+        with:
+          name: release
+          path: release-zip
+  deploy_to_pages:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@master
+        with:
+          name: release
+          path: release-zip
+      - name: Unzip
+        run: |
+          tar -xzvf ./release-zip/release.tar.gz
+          cp -rf build/* .
+          rm -rf release-zip build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

@@ -11,6 +11,7 @@ export const Steps: React.FC<{ steps: number; currentStep: number }> = (props) =
                         size="lg"
                         borderRadius="full"
                         variant="solid"
+                        transition="color background-color 1s"
                         colorScheme={index + 1 === props.currentStep ? 'teal' : undefined}
                     >
                         <TagLabel>{index + 1}</TagLabel>

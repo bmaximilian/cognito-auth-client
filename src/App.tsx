@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import { Container } from '@chakra-ui/react';
+import { Container, Heading } from '@chakra-ui/react';
 import { Steps } from './components/Steps';
 import { InitialLoginData, LoginForm } from './widgets/LoginForm';
 import { SavedEntry, SavedEntryList } from './widgets/SavedEntryList';
@@ -69,11 +69,15 @@ const App: React.FC = () => {
     ];
 
     return (
-        <Container mt={{ base: '2rem', md: '20vh' }} transition="margin-top .5s">
+        <Container maxW="container.md" mt="2rem" transition="width .5s">
+            <Heading as="h1" mb="1rem">
+                Cognito Auth Client
+            </Heading>
             <Steps steps={steps.length} currentStep={step} />
             {step !== 1 && (step !== 2 || items.length > 0) && <BackButton onClick={handleGoBack} />}
             {steps[step - 1]}
             <PinModal
+                onClose={(): void => setRequestedDataKey(undefined)}
                 isOpen={!!requestedDataKey}
                 onPinEntered={handlePinEntered}
                 title={`Enter security pin for ${requestedDataKey}`}

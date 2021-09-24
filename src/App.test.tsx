@@ -5,7 +5,7 @@ import App from './App';
 import { SafeProvider } from './safe';
 import { CognitoAuthenticationProvider } from './auth';
 
-test('renders the button', async () => {
+test('renders the page heading', async () => {
     render(
         <ChakraProvider>
             <SafeProvider>
@@ -17,7 +17,7 @@ test('renders the button', async () => {
     );
 
     await waitFor(() => {
-        const linkElement = screen.getByText(/Application/i);
-        expect(linkElement).toBeInTheDocument();
+        const heading = screen.getByText(/Cognito Auth Client/i);
+        expect(heading).toBeInTheDocument();
     });
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Checkbox, Stack } from '@chakra-ui/react';
+import { Checkbox, SlideFade, Stack } from '@chakra-ui/react';
 import equals from 'deep-equal';
 import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
@@ -7,6 +7,7 @@ import { SubmitButton } from '../components/SubmitButton';
 import { PinModal } from '../components/PinModal';
 import { useSafe, LoginData } from '../safe';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { DescriptionBox } from '../components/DescriptionBox';
 
 export interface InitialLoginData extends LoginData {
     title: string;
@@ -28,6 +29,7 @@ export const LoginForm: React.FC<{
     const [save, setSave] = useState(false);
     const [error, setError] = useState<string>();
 
+    const [isLoading, setLoading] = useState(false);
     const [showPinModal, setShowPinModal] = useState(false);
     const safe = useSafe();
 
@@ -60,8 +62,14 @@ export const LoginForm: React.FC<{
         };
     }
 
+    function completeLogin(): void {
+        props.onComplete();
+        setLoading(false);
+    }
+
     async function handleSubmit(): Promise<void> {
         try {
+            setLoading(true);
             const data = buildForm();
             await props.onSubmit(data);
 
@@ -72,20 +80,27 @@ export const LoginForm: React.FC<{
                 return;
             }
 
-            props.onComplete();
+            completeLogin();
         } catch (e) {
             setError(e.message);
+            setLoading(false);
         }
     }
 
     async function handlePinEntered(pin: string): Promise<void> {
         await safe.store(title, buildForm(), pin);
         setShowPinModal(false);
-        props.onComplete();
+        completeLogin();
     }
 
     return (
-        <>
+        <SlideFade in offsetY="2rem">
+            <DescriptionBox>
+                Fill out this form to test the login with a specific user pool client.
+                <br />
+                The <strong>title</strong> entered in the application section will be used to store the data set if{' '}
+                <strong>Save for later</strong> is activated.
+            </DescriptionBox>
             <form
                 onSubmit={(e): void => {
                     e.preventDefault();
@@ -94,7 +109,6 @@ export const LoginForm: React.FC<{
             >
                 <FormGroup title="Application">
                     <Input
-                        autoFocus
                         placeholder="Title"
                         isRequired
                         value={title}
@@ -147,7 +161,9 @@ export const LoginForm: React.FC<{
                         Save for later
                     </Checkbox>
                     {!!error && <ErrorBanner title="Error during login" message={error} />}
-                    <SubmitButton type="submit">Login</SubmitButton>
+                    <SubmitButton isLoading={isLoading} type="submit" loadingText="Signing in">
+                        Login
+                    </SubmitButton>
                 </Stack>
             </form>
             <PinModal
@@ -157,6 +173,6 @@ export const LoginForm: React.FC<{
                 // eslint-disable-next-line max-len
                 description="The pin is needed to encrypt and store your saved data securely. To access the remembered data, the pin needs to be re-entered again."
             />
-        </>
+        </SlideFade>
     );
 };

@@ -7,7 +7,9 @@ import { SavedEntry, SavedEntryList } from './widgets/SavedEntryList';
 import { TokenDisplay } from './widgets/TokenDisplay';
 import { BackButton } from './components/BackButton';
 
-const items: SavedEntry[] = [];
+const items: SavedEntry[] = Object.keys(JSON.parse(localStorage.getItem('savedLogins') || '{}')).map((title) => ({
+    title,
+}));
 
 const App: React.FC = () => {
     const [step, setStep] = useState(1);
@@ -16,21 +18,21 @@ const App: React.FC = () => {
         setStep(2);
     }
 
-    function handleAddEntry(): void {
-        setStep(2);
-    }
-
     async function handleLogin(data: LoginData): Promise<void> {
-        setStep(3);
+        return Promise.resolve();
     }
 
     function handleGoBack(): void {
         setStep((current) => current - 1);
     }
 
+    function handleNextStep(): void {
+        setStep((current) => current + 1);
+    }
+
     const steps = [
-        <SavedEntryList key={0} items={items} onAdd={handleAddEntry} onItemClick={handleLoadSavedEntry} />,
-        <LoginForm key={1} onSubmit={handleLogin} />,
+        <SavedEntryList key={0} items={items} onAdd={handleNextStep} onItemClick={handleLoadSavedEntry} />,
+        <LoginForm key={1} onSubmit={handleLogin} onComplete={handleNextStep} />,
         <TokenDisplay
             key={2}
             // eslint-disable-next-line max-len

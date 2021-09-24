@@ -8,9 +8,11 @@ import { TokenDisplay } from './widgets/TokenDisplay';
 import { BackButton } from './components/BackButton';
 import { useSafe, LoginData } from './safe';
 import { PinModal } from './components/PinModal';
+import { useAuthentication } from './auth';
 
 const App: React.FC = () => {
     const safe = useSafe();
+    const auth = useAuthentication();
     const [step, setStep] = useState(1);
     const [items, setItems] = useState<SavedEntry[]>();
     const [prefilledData, setPrefilledData] = useState<InitialLoginData>();
@@ -39,7 +41,7 @@ const App: React.FC = () => {
     }
 
     async function handleLogin(data: LoginData): Promise<void> {
-        return Promise.resolve();
+        await auth.login(data);
     }
 
     function handleLoginComplete(): void {
@@ -63,13 +65,7 @@ const App: React.FC = () => {
             onItemClick={({ title }): void => setRequestedDataKey(title)}
         />,
         <LoginForm key={1} onSubmit={handleLogin} onComplete={handleLoginComplete} initialData={prefilledData} />,
-        <TokenDisplay
-            key={2}
-            // eslint-disable-next-line max-len
-            accessToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-            // eslint-disable-next-line max-len
-            idToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-        />,
+        <TokenDisplay key={2} />,
     ];
 
     return (

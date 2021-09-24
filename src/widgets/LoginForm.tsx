@@ -17,6 +17,8 @@ export const LoginForm: React.FC<{
     initialData?: InitialLoginData;
 }> = (props) => {
     const [title, setTitle] = useState('');
+    const [userPoolId, setUserPoolId] = useState('');
+    const [userPoolRegion, setUserPoolRegion] = useState('');
     const [userPoolClientId, setUserPoolClientId] = useState('');
     const [userPoolClientSecret, setUserPoolClientSecret] = useState('');
     const [username, setUsername] = useState('');
@@ -29,8 +31,10 @@ export const LoginForm: React.FC<{
 
     useEffect(() => {
         setTitle(props.initialData?.title || '');
-        setUserPoolClientId(props.initialData?.userPoolClient.id || '');
-        setUserPoolClientSecret(props.initialData?.userPoolClient.secret || '');
+        setUserPoolId(props.initialData?.userPool.id || '');
+        setUserPoolRegion(props.initialData?.userPool.region || 'eu-central-1');
+        setUserPoolClientId(props.initialData?.userPool.clientId || '');
+        setUserPoolClientSecret(props.initialData?.userPool.secret || '');
         setUsername(props.initialData?.username || '');
         setPassword(props.initialData?.password || '');
         setScope(props.initialData?.metadata.scope || '');
@@ -39,8 +43,10 @@ export const LoginForm: React.FC<{
 
     function buildForm(): LoginData {
         return {
-            userPoolClient: {
-                id: userPoolClientId,
+            userPool: {
+                id: userPoolId,
+                region: userPoolRegion,
+                clientId: userPoolClientId,
                 secret: userPoolClientSecret || undefined,
             },
             username,
@@ -94,6 +100,18 @@ export const LoginForm: React.FC<{
                 <FormGroup title="User Pool Client">
                     <Input
                         placeholder="ID"
+                        isRequired
+                        value={userPoolId}
+                        onChange={(e): void => setUserPoolId(e.target.value)}
+                    />
+                    <Input
+                        placeholder="Region"
+                        isRequired
+                        value={userPoolRegion}
+                        onChange={(e): void => setUserPoolRegion(e.target.value)}
+                    />
+                    <Input
+                        placeholder="Client ID"
                         isRequired
                         value={userPoolClientId}
                         onChange={(e): void => setUserPoolClientId(e.target.value)}

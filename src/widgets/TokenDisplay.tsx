@@ -1,11 +1,7 @@
 import React from 'react';
 import { Flex } from '@chakra-ui/react';
 import { List } from '../components/List';
-
-interface TokenDisplayProps {
-    accessToken: string;
-    idToken: string;
-}
+import { useAuthentication } from '../auth';
 
 const TokenItem: React.FC<{ title: string; token: string }> = (props) => (
     <List.Item flex={1}>
@@ -18,11 +14,19 @@ const TokenItem: React.FC<{ title: string; token: string }> = (props) => (
     </List.Item>
 );
 
-export const TokenDisplay: React.FC<TokenDisplayProps> = (props) => (
-    <>
+export const TokenDisplay: React.FC = () => {
+    const auth = useAuthentication();
+
+    if (!auth.hasTokens()) {
+        return null;
+    }
+
+    const tokens = auth.getTokens();
+
+    return (
         <List>
-            <TokenItem title="ID Token" token={props.idToken} />
-            <TokenItem title="Access Token" token={props.accessToken} />
+            <TokenItem title="ID Token" token={tokens.idToken.jwt} />
+            <TokenItem title="Access Token" token={tokens.accessToken.jwt} />
         </List>
-    </>
-);
+    );
+};

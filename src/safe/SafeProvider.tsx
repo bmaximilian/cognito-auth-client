@@ -2,8 +2,10 @@ import React, { createContext, useContext } from 'react';
 import { AES, enc } from 'crypto-js';
 
 export interface LoginData {
-    userPoolClient: {
+    userPool: {
         id: string;
+        region: string;
+        clientId: string;
         secret?: string;
     };
     username: string;

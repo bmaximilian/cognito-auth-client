@@ -5,12 +5,15 @@ import { ChakraProvider } from '@chakra-ui/react';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { SafeProvider } from './safe';
+import { CognitoAuthenticationProvider } from './auth';
 
 ReactDOM.render(
     <React.StrictMode>
         <ChakraProvider>
             <SafeProvider>
-                <App />
+                <CognitoAuthenticationProvider>
+                    <App />
+                </CognitoAuthenticationProvider>
             </SafeProvider>
         </ChakraProvider>
     </React.StrictMode>,

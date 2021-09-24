@@ -2,6 +2,7 @@
   "name": "cognito-auth-client",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://bmaximilian.github.io/cognito-auth-client/",
   "dependencies": {
     "@aws-amplify/auth": "^4.3.8",
     "@chakra-ui/icons": "^1.0.15",

@@ -1,27 +1,21 @@
-import React, { useState } from 'react';
-import { AES } from 'crypto-js';
+import React, { useEffect, useState } from 'react';
 import { Checkbox, Stack } from '@chakra-ui/react';
+import equals from 'deep-equal';
 import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
 import { SubmitButton } from '../components/SubmitButton';
 import { PinModal } from '../components/PinModal';
+import { useSafe, LoginData } from '../safe';
 
-export interface LoginData {
-    userPoolClient: {
-        id: string;
-        secret?: string;
-    };
-    username: string;
-    password: string;
-    metadata: {
-        scope?: string;
-    };
-    save: boolean;
+export interface InitialLoginData extends LoginData {
+    title: string;
 }
 
-export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => Promise<void>; onComplete: () => void }> = (
-    props
-) => {
+export const LoginForm: React.FC<{
+    onSubmit: (data: LoginData) => Promise<void>;
+    onComplete: () => void;
+    initialData?: InitialLoginData;
+}> = (props) => {
     const [title, setTitle] = useState('');
     const [userPoolClientId, setUserPoolClientId] = useState('');
     const [userPoolClientSecret, setUserPoolClientSecret] = useState('');
@@ -31,6 +25,17 @@ export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => Promise<void>;
     const [save, setSave] = useState(false);
 
     const [showPinModal, setShowPinModal] = useState(false);
+    const safe = useSafe();
+
+    useEffect(() => {
+        setTitle(props.initialData?.title || '');
+        setUserPoolClientId(props.initialData?.userPoolClient.id || '');
+        setUserPoolClientSecret(props.initialData?.userPoolClient.secret || '');
+        setUsername(props.initialData?.username || '');
+        setPassword(props.initialData?.password || '');
+        setScope(props.initialData?.metadata.scope || '');
+        setSave(!!props.initialData?.save);
+    }, [props.initialData]);
 
     function buildForm(): LoginData {
         return {
@@ -49,9 +54,10 @@ export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => Promise<void>;
 
     async function handleSubmit(): Promise<void> {
         try {
-            await props.onSubmit(buildForm());
+            const data = buildForm();
+            await props.onSubmit(data);
 
-            if (save) {
+            if (save && !equals({ title, ...data }, props.initialData)) {
                 setShowPinModal(true);
                 return;
             }
@@ -62,18 +68,8 @@ export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => Promise<void>;
         }
     }
 
-    function handlePinEntered(pin: string): void {
-        const entries = localStorage.getItem('savedLogins') || {};
-        const encrypted = AES.encrypt(JSON.stringify(buildForm()), pin).toString();
-
-        localStorage.setItem(
-            'savedLogins',
-            JSON.stringify({
-                ...entries,
-                [title]: encrypted,
-            })
-        );
-
+    async function handlePinEntered(pin: string): Promise<void> {
+        await safe.store(title, buildForm(), pin);
         setShowPinModal(false);
         props.onComplete();
     }
@@ -87,30 +83,57 @@ export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => Promise<void>;
                 }}
             >
                 <FormGroup title="Application">
-                    <Input placeholder="Title" isRequired onChange={(e): void => setTitle(e.target.value)} />
+                    <Input
+                        autoFocus
+                        placeholder="Title"
+                        isRequired
+                        value={title}
+                        onChange={(e): void => setTitle(e.target.value)}
+                    />
                 </FormGroup>
                 <FormGroup title="User Pool Client">
-                    <Input placeholder="ID" isRequired onChange={(e): void => setUserPoolClientId(e.target.value)} />
-                    <Input placeholder="Secret" onChange={(e): void => setUserPoolClientSecret(e.target.value)} />
+                    <Input
+                        placeholder="ID"
+                        isRequired
+                        value={userPoolClientId}
+                        onChange={(e): void => setUserPoolClientId(e.target.value)}
+                    />
+                    <Input
+                        placeholder="Secret"
+                        value={userPoolClientSecret}
+                        onChange={(e): void => setUserPoolClientSecret(e.target.value)}
+                    />
                 </FormGroup>
                 <FormGroup title="Login">
-                    <Input placeholder="Username" isRequired onChange={(e): void => setUsername(e.target.value)} />
+                    <Input
+                        placeholder="Username"
+                        value={username}
+                        isRequired
+                        onChange={(e): void => setUsername(e.target.value)}
+                    />
                     <Input
                         placeholder="Password"
                         isRequired
                         type="password"
+                        value={password}
                         onChange={(e): void => setPassword(e.target.value)}
                     />
-                    <Input placeholder="Scope" onChange={(e): void => setScope(e.target.value)} />
+                    <Input placeholder="Scope" value={scope} onChange={(e): void => setScope(e.target.value)} />
                 </FormGroup>
                 <Stack spacing={3}>
-                    <Checkbox colorScheme="teal" onChange={(e): void => setSave(e.target.checked)}>
+                    <Checkbox colorScheme="teal" isChecked={save} onChange={(e): void => setSave(e.target.checked)}>
                         Save for later
                     </Checkbox>
                     <SubmitButton type="submit">Login</SubmitButton>
                 </Stack>
             </form>
-            <PinModal isOpen={showPinModal} onPinEntered={handlePinEntered} />
+            <PinModal
+                isOpen={showPinModal}
+                onPinEntered={handlePinEntered}
+                title={`Enter security pin for ${title}`}
+                // eslint-disable-next-line max-len
+                description="The pin is needed to encrypt and store your saved data securely. To access the remembered data, the pin needs to be re-entered again."
+            />
         </>
     );
 };

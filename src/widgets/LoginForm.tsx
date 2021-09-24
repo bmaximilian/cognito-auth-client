@@ -17,7 +17,7 @@ export interface LoginData {
     save: boolean;
 }
 
-export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => void }> = (props) => {
+export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => Promise<void> }> = (props) => {
     const [userPoolClientId, setUserPoolClientId] = useState('');
     const [userPoolClientSecret, setUserPoolClientSecret] = useState('');
     const [username, setUsername] = useState('');
@@ -25,19 +25,27 @@ export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => void }> = (pro
     const [scope, setScope] = useState('');
     const [save, setSave] = useState(false);
 
-    function handleSubmit(): void {
-        props.onSubmit({
-            userPoolClient: {
-                id: userPoolClientId,
-                secret: userPoolClientSecret || undefined,
-            },
-            username,
-            password,
-            metadata: {
-                scope: scope || undefined,
-            },
-            save,
-        });
+    async function handleSubmit(): Promise<void> {
+        try {
+            await props.onSubmit({
+                userPoolClient: {
+                    id: userPoolClientId,
+                    secret: userPoolClientSecret || undefined,
+                },
+                username,
+                password,
+                metadata: {
+                    scope: scope || undefined,
+                },
+                save,
+            });
+
+            if (save) {
+                // TODO: Show modal
+            }
+        } catch (e) {
+            // TODO: Display error
+        }
     }
 
     return (
@@ -57,7 +65,9 @@ export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => void }> = (pro
                 <Input placeholder="Scope" onChange={(e): void => setScope(e.target.value)} />
             </FormGroup>
             <Stack spacing={3}>
-                <Checkbox onChange={(e): void => setSave(e.target.checked)}>Save for later</Checkbox>
+                <Checkbox colorScheme="teal" onChange={(e): void => setSave(e.target.checked)}>
+                    Save for later
+                </Checkbox>
                 <SubmitButton type="submit">Login</SubmitButton>
             </Stack>
         </form>

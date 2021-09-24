@@ -8,7 +8,7 @@ export const SubmitButton: React.FC<ButtonProps> = (props) => (
         borderRadius="lg"
         padding="1.5rem"
         variant="solid"
-        colorScheme="green"
+        colorScheme="teal"
         {...props}
     />
 );

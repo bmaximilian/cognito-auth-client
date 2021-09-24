@@ -6,6 +6,7 @@ import { Input } from '../components/Input';
 import { SubmitButton } from '../components/SubmitButton';
 import { PinModal } from '../components/PinModal';
 import { useSafe, LoginData } from '../safe';
+import { ErrorBanner } from '../components/ErrorBanner';
 
 export interface InitialLoginData extends LoginData {
     title: string;
@@ -25,6 +26,7 @@ export const LoginForm: React.FC<{
     const [password, setPassword] = useState('');
     const [scope, setScope] = useState('');
     const [save, setSave] = useState(false);
+    const [error, setError] = useState<string>();
 
     const [showPinModal, setShowPinModal] = useState(false);
     const safe = useSafe();
@@ -72,7 +74,7 @@ export const LoginForm: React.FC<{
 
             props.onComplete();
         } catch (e) {
-            // TODO: Display error
+            setError(e.message);
         }
     }
 
@@ -144,6 +146,7 @@ export const LoginForm: React.FC<{
                     <Checkbox colorScheme="teal" isChecked={save} onChange={(e): void => setSave(e.target.checked)}>
                         Save for later
                     </Checkbox>
+                    {!!error && <ErrorBanner title="Error during login" message={error} />}
                     <SubmitButton type="submit">Login</SubmitButton>
                 </Stack>
             </form>

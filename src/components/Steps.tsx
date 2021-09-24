@@ -15,7 +15,7 @@ export const Steps: React.FC<{ steps: number; currentStep: number }> = (props) =
                     >
                         <TagLabel>{index + 1}</TagLabel>
                     </Tag>
-                    {index !== props.steps - 1 && <Divider marginX="2" />}
+                    {index !== props.steps - 1 && <Divider marginX="1rem" />}
                 </React.Fragment>
             ))}
         </Flex>

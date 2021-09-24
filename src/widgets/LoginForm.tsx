@@ -63,7 +63,9 @@ export const LoginForm: React.FC<{
             const data = buildForm();
             await props.onSubmit(data);
 
-            if (save && !equals({ title, ...data }, props.initialData)) {
+            const dataWithTitle = { title, ...data };
+
+            if (save && !equals(dataWithTitle, props.initialData)) {
                 setShowPinModal(true);
                 return;
             }

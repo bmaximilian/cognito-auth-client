@@ -1,5 +1,11 @@
 import React, { createContext, useContext } from 'react';
 import { AES, enc } from 'crypto-js';
+import merge from 'deepmerge';
+
+export declare type DeepPartial<T> = {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
 
 export interface LoginData {
     userPool: {
@@ -28,6 +34,21 @@ interface Safe {
 
 const SafeContext = createContext<Safe | undefined>(undefined);
 
+const undefinedData: DeepPartial<LoginData> = {
+    userPool: {
+        id: undefined,
+        region: undefined,
+        clientId: undefined,
+        secret: undefined,
+    },
+    username: undefined,
+    password: undefined,
+    metadata: {
+        scope: undefined,
+    },
+    save: true,
+};
+
 export const SafeProvider: React.FC = (props) => {
     const safe: Safe = {
         async getAll(): Promise<{ [key: string]: string }> {
@@ -44,7 +65,7 @@ export const SafeProvider: React.FC = (props) => {
             }
 
             const decrypted = AES.decrypt(entries[key], pin).toString(enc.Utf8);
-            return JSON.parse(decrypted);
+            return merge(undefinedData, JSON.parse(decrypted)) as LoginData;
         },
         async store(key: string, value: LoginData, pin: string): Promise<void> {
             const entries = this.getAll();

@@ -28,7 +28,7 @@ export const SavedEntryList: React.FC<SavedEntryListProps> = (props) => (
         ))}
         <SubmitButton onClick={props.onAdd}>
             <AddIcon />
-            &ensp;Neuen Eintrag erstellen
+            &ensp;Continue without saved data
         </SubmitButton>
     </ListContainer>
 );

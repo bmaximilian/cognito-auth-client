@@ -58,7 +58,7 @@ export const LoginForm: React.FC<{ onSubmit: (data: LoginData) => void }> = (pro
             </FormGroup>
             <Stack spacing={3}>
                 <Checkbox onChange={(e): void => setSave(e.target.checked)}>Save for later</Checkbox>
-                <SubmitButton type="submit">Anmelden</SubmitButton>
+                <SubmitButton type="submit">Login</SubmitButton>
             </Stack>
         </form>
     );
